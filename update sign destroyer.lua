@@ -1,3 +1,9 @@
+game:GetService("StarterGui"):SetCore("SendNotification", { 
+	Title = "Notification";
+	Text = "script by joshclark756#7155";
+	Icon = "rbxthumb://type=Asset&id=5107182114&w=150&h=150"})
+Duration = 16;
+
 for i,v in pairs(game:GetDescendants()) do
    if v:isA("SurfaceGui") then
        v:Destroy()
