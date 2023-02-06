@@ -1,4 +1,3 @@
-loadstring(game:HttpGet("https://raw.githubusercontent.com/joshclark756/joshclark756-s-scripts/main/update%20sign%20destroyer.lua",true))()
 game:GetService("StarterGui"):SetCore("SendNotification", { 
 	Title = "Notification";
 	Text = "script by joshclark756#7155";
