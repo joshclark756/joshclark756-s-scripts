@@ -1,7 +1,13 @@
+
 -- init
 if not game.IsLoaded(game) then
    repeat task.wait() until game.IsLoaded(game)
 end
+game:GetService("StarterGui"):SetCore("SendNotification", { 
+	Title = "anti fling activated";
+	Text = "script by joshclark756#7155";
+	Icon = "rbxthumb://type=Asset&id=5107182114&w=150&h=150"})
+Duration = 16;
 
 -- variables
 local RunService, FindFirstChildOfClass = game.GetService(game, "RunService"), game.FindFirstChildOfClass;
