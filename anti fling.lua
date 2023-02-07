@@ -14,7 +14,7 @@ local RunService, FindFirstChildOfClass = game.GetService(game, "RunService"), g
 local Client = game.GetService(game, "Players").LocalPlayer
 
 -- functions
-function ModifyVelocity()
+function AntiFling()
    local HeartbeatLoop = nil
    
    for _, v in next, game:GetDescendants() do
@@ -33,12 +33,12 @@ function ModifyVelocity()
        HeartbeatLoop:Disconnect()
        HeartbeatLoop = nil
    end)
-ModifyVelocity()
-workspace.DescendantAdded:Connect(function(part) if part:isA("Part") and part.Name == "HumanoidRootPart" then do  ModifyVelocity()
+AntiFling()
+workspace.DescendantAdded:Connect(function(part) if part:isA("Part") and part.Name == "HumanoidRootPart" then do AntiFling()
 function CharacterAddedEvent(Character)
    repeat task.wait() until FindFirstChildOfClass(Character, "Humanoid")
    
-  ModifyVelocity()
+ AntiFling()
   
 end
 Client.CharacterAdded:Connect(CharacterAddedEvent)
