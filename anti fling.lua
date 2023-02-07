@@ -1,4 +1,3 @@
-
 -- init
 if not game.IsLoaded(game) then
    repeat task.wait() until game.IsLoaded(game)
@@ -8,13 +7,12 @@ game:GetService("StarterGui"):SetCore("SendNotification", {
 	Text = "script by joshclark756#7155";
 	Icon = "rbxthumb://type=Asset&id=5107182114&w=150&h=150"})
 Duration = 16;
-
 -- variables
 local RunService, FindFirstChildOfClass = game.GetService(game, "RunService"), game.FindFirstChildOfClass;
 local Client = game.GetService(game, "Players").LocalPlayer
 
 -- functions
-function AntiFling()
+function ModifyVelocity()
    local HeartbeatLoop = nil
    
    for _, v in next, game:GetDescendants() do
@@ -24,8 +22,14 @@ function AntiFling()
                v.Velocity = Vector3.new(0,0,0)
                v.RotVelocity = Vector3.new(0,0,0)
                v.CanCollide = false
+               
            end)
-       end
+       elseif v.Name == "Torso" then 
+           HeartbeatLoop = RunService.Heartbeat:Connect(function()
+               v.CustomPhysicalProperties = PhysicalProperties.new(0,0,0,0,0)
+               v.Velocity = Vector3.new(0,0,0)
+               v.RotVelocity = Vector3.new(0,0,0)
+       end)
    end
    end
    
@@ -33,15 +37,16 @@ function AntiFling()
        HeartbeatLoop:Disconnect()
        HeartbeatLoop = nil
    end)
-AntiFling()
-workspace.DescendantAdded:Connect(function(part) if part:isA("Part") and part.Name == "HumanoidRootPart" then do AntiFling()
+ModifyVelocity()
+workspace.DescendantAdded:Connect(function(part) if part:isA("Part") and part.Name == "HumanoidRootPart" then do  ModifyVelocity()
 function CharacterAddedEvent(Character)
    repeat task.wait() until FindFirstChildOfClass(Character, "Humanoid")
    
- AntiFling()
+  ModifyVelocity()
   
 end
 Client.CharacterAdded:Connect(CharacterAddedEvent)
 end
 end
 end)
+end
