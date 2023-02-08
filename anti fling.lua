@@ -1,4 +1,4 @@
-
+wait(10)
 -- init
 if not game.IsLoaded(game) then
    repeat task.wait() until game.IsLoaded(game)
@@ -34,7 +34,8 @@ function AntiFling()
        HeartbeatLoop = nil
    end)
 AntiFling()
-workspace.DescendantAdded:Connect(function(part) if part:isA("Part") and part.Name == "HumanoidRootPart" then do AntiFling()
+workspace.DescendantAdded:Connect(function(part) if part:isA("Part") and part.Name == "HumanoidRootPart"  and part.Parent ~= Client.Character then do AntiFling()
+end
 function CharacterAddedEvent(Character)
    repeat task.wait() until FindFirstChildOfClass(Character, "Humanoid")
    
@@ -42,6 +43,5 @@ function CharacterAddedEvent(Character)
   
 end
 Client.CharacterAdded:Connect(CharacterAddedEvent)
-end
 end
 end)
