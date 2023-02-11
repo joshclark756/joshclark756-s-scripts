@@ -24,6 +24,7 @@ function AntiFling()
                v.Velocity = Vector3.new(0,0,0)
                v.RotVelocity = Vector3.new(0,0,0)
                v.CanCollide = false
+task.wait(1)
            end)
        end
    end
@@ -34,7 +35,7 @@ function AntiFling()
        HeartbeatLoop = nil
    end)
 AntiFling()
-workspace.DescendantAdded:Connect(function(part) if part:isA("Part") and part.Name == "HumanoidRootPart"  and part.Parent ~= Client.Character then do AntiFling()
+workspace.DescendantAdded:Connect(function(part) if part:isA("Part") and part.Name == "HumanoidRootPart"  and part.Parent ~= game.Players.LocalPlayer.Character then do wait(2) AntiFling()
 end
 function CharacterAddedEvent(Character)
    repeat task.wait() until FindFirstChildOfClass(Character, "Humanoid")
