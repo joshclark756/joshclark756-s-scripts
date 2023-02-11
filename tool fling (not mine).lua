@@ -1,3 +1,4 @@
+-- not my script but very useful and not very known
 local function velocity(part)
    if part:FindFirstChild('BodyPosition') then  
        if not part:FindFirstChild('BodyVelocity') then
