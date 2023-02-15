@@ -37,12 +37,7 @@ task.wait(1)
 AntiFling()
 workspace.DescendantAdded:Connect(function(part) if part:isA("Part") and part.Name == "HumanoidRootPart"  and part.Parent ~= game.Players.LocalPlayer.Character then do wait(2) AntiFling()
 end
-function CharacterAddedEvent(Character)
-   repeat task.wait() until FindFirstChildOfClass(Character, "Humanoid")
-   
- AntiFling()
-  
-end
-Client.CharacterAdded:Connect(CharacterAddedEvent)
+
+
 end
 end)
