@@ -1,4 +1,4 @@
---for i=1,4 do             
+--for i=1,4 do remove the -- if your not using loadstring version         
 local block = Instance.new("Part")
 local bp = Instance.new("BodyPosition")
 block.CFrame = CFrame.new(9e9,9e9,9e9)
