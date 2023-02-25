@@ -1,6 +1,6 @@
 aa = game:GetObjects("rbxassetid://01997056190")[1]
 aa.Parent = game.CoreGui
-game:GetService("CoreGui").AL.PopupFrame.PopupFrame.Title.Text = "joshclark756's Decal Logger (Thanks edge)"
+game:GetService("CoreGui").AL.PopupFrame.PopupFrame.Title.Text = "joshclark756's Decal Logger"
 wait(0.2)
 GUI = aa.PopupFrame.PopupFrame
 pos = 0
