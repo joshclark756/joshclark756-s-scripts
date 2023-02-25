@@ -391,6 +391,7 @@ GUI.Info.Listen.MouseButton1Click:Connect(function()
 	    local decalblock =  Instance.new("Part")
 	    decalblock.Parent = workspace
 	    decalblock.Name = "decalblock"
+	    decalblock.Size = Vector3.new(8,5.19999999809265127,2)
 	    decalblock.Position = game.Players.LocalPlayer.Character.HumanoidRootPart.Position + Vector3.new(3,0,0)
 		local samplesound = Instance.new('Decal') samplesound.Parent = decalblock
         samplesound.Texture = selectedimage  samplesound.Name = 'SampleSound'
