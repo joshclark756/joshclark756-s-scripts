@@ -202,7 +202,7 @@ function getimage(place)
 				if child:IsA("Decal") and not GUI.Logs:FindFirstChild(child.Texture) and not FindTable(ignore,child.Texture) then
 					local id = string.match(child.Texture, "rbxasset://sounds.+") or string.match(child.Texture, "&hash=.+") or string.match(child.Texture, "%d+")
 					if id ~= nil then		
-						local newsound = GUI.image:Clone()
+						local newsound = GUI.Audio:Clone()
 						if string.sub(id, 1, 6) == "&hash=" or string.sub(id, 1, 7) == "&0hash=" then
 							id = string.sub(id, (string.sub(id, 1, 6) == "&hash=" and 7) or (string.sub(id, 1, 7) == "&0hash=" and 8), string.len(id))
 							newsound.ImageButton.Image = 'rbxassetid://1453863294'
@@ -309,7 +309,7 @@ game.DescendantAdded:connect(function(added)
 	if autoscan == true and added:IsA('Decal') and not GUI.Logs:FindFirstChild(added.Texture) and not FindTable(ignore,added.Texture) then
 		local id = string.match(added.Texture, "rbxasset://sounds.+") or string.match(added.Texture, "&hash=.+") or string.match(added.Texture, "%d+")
 		if id ~= nil then		
-			local newsound = GUI.image:Clone()
+			local newsound = GUI.Audio:Clone()
 				if string.sub(id, 1, 6) == "&hash=" or string.sub(id, 1, 7) == "&0hash=" then
 					id = string.sub(id, (string.sub(id, 1, 6) == "&hash=" and 7) or (string.sub(id, 1, 7) == "&0hash=" and 8), string.len(id))
 					newsound.ImageButton.Image = 'rbxassetid://1453863294'
@@ -376,7 +376,7 @@ GUI.Info.Copy.MouseButton1Click:Connect(function()
 		Duration = 5,
 	})
 end)
-
+GUI.Info.Listen.Text = "Spawn"
 GUI.Info.Close.MouseButton1Click:Connect(function()
 	GUI.Info.Visible = false
 	for _, sound in pairs(game:GetService('Players').LocalPlayer.PlayerGui:GetChildren()) do
@@ -384,22 +384,24 @@ GUI.Info.Close.MouseButton1Click:Connect(function()
 			sound:Destroy()
 		end
 	end
-	GUI.Info.Listen.Text = 'Listen'
 end)
 
 GUI.Info.Listen.MouseButton1Click:Connect(function()
-	if GUI.Info.Listen.Text == 'Listen' then
-		local samplesound = Instance.new('Sound') samplesound.Parent = game:GetService('Players').LocalPlayer.PlayerGui
-		samplesound.Looped = true samplesound.Texture = selectedimage samplesound:Play() samplesound.Name = 'SampleSound'
-		samplesound.Volume = 5
-		GUI.Info.Listen.Text = 'Stop'
+	if GUI.Info.Listen.Text == "Spawn" then
+	    local decalblock =  Instance.new("Part")
+	    decalblock.Parent = workspace
+	    decalblock.Name = "decalblock"
+	    decalblock.Position = game.Players.LocalPlayer.Character.HumanoidRootPart.Position + Vector3.new(3,0,0)
+		local samplesound = Instance.new('Decal') samplesound.Parent = decalblock
+        samplesound.Texture = selectedimage  samplesound.Name = 'SampleSound'
+		GUI.Info.Listen.Text = "remove"
 	else
-		for _, sound in pairs(game:GetService('Players').LocalPlayer.PlayerGui:GetChildren()) do
+		for _, sound in pairs(game.workspace:GetDescendants()) do
 			if sound.Name == 'SampleSound' then
-				sound:Destroy()
+				sound.Parent:Destroy()
 			end
 		end
-		GUI.Info.Listen.Text = 'Listen'
+		GUI.Info.Listen.Text = "Spawn"
 	end
 end)
 
