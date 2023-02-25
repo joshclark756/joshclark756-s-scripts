@@ -1,6 +1,6 @@
 aa = game:GetObjects("rbxassetid://01997056190")[1]
 aa.Parent = game.CoreGui
-game:GetService("CoreGui").AL.PopupFrame.PopupFrame.Title.Text = "joshclark756's Decal Logger"
+game:GetService("CoreGui").AL.PopupFrame.PopupFrame.Title.Text = "joshclark756's Decal Logger (Thanks edge)"
 wait(0.2)
 GUI = aa.PopupFrame.PopupFrame
 pos = 0
@@ -389,12 +389,19 @@ end)
 GUI.Info.Listen.MouseButton1Click:Connect(function()
 	if GUI.Info.Listen.Text == "Spawn" then
 	    local decalblock =  Instance.new("Part")
+	    local decalblock2 = Instance.new("Part")
 	    decalblock.Parent = workspace
 	    decalblock.Name = "decalblock"
 	    decalblock.Size = Vector3.new(8,5.19999999809265127,2)
-	    decalblock.Color = Color3.new(color)
+	    decalblock.Color = Color3.new()
 	    decalblock.Position = game.Players.LocalPlayer.Character.HumanoidRootPart.Position + Vector3.new(3,0,0)
+	    decalblock2.Parent = workspace
+	    decalblock2.Name = "decalblock"
+	    decalblock2.Size = Vector3.new(8,5.19999999809265127,2)
+	    decalblock2.Position = game.Players.LocalPlayer.Character.HumanoidRootPart.Position + Vector3.new(-4,0,0)
 		local samplesound = Instance.new('Decal') samplesound.Parent = decalblock
+		local samplesound2 = Instance.new("Decal") samplesound2.Parent = decalblock2
+		samplesound2.Texture = selectedimage  samplesound2.Name = 'SampleSound'
         samplesound.Texture = selectedimage  samplesound.Name = 'SampleSound'
 		GUI.Info.Listen.Text = "remove"
 	else
