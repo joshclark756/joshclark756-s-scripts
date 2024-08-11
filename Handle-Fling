@@ -1,0 +1,155 @@
+-- made by joshclark756
+-- notes: this is made for tools that have collision ex: cant say the word tools it works with "amongus" "sign - gamepass"
+local RunService = game:GetService("RunService")
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+local LocalPlayer = Players.LocalPlayer
+
+local teleportEnabled = false
+local velocityEnabled = false
+
+local function getRoot(char)
+    return char:FindFirstChild("HumanoidRootPart") or char:FindFirstChild("Torso") or char:FindFirstChild("UpperTorso")
+end
+
+local function velocityBypasser()
+    while true do
+        if velocityEnabled then
+            RunService.Heartbeat:Wait()
+            local character = LocalPlayer.Character
+            local root = getRoot(character)
+            local vel, movel = nil, 0.1
+
+            while velocityEnabled and not (character and character.Parent and root and root.Parent) do
+                RunService.Heartbeat:Wait()
+                character = LocalPlayer.Character
+                root = getRoot(character)
+            end
+
+            if not velocityEnabled then return end
+
+            vel = root.Velocity
+            root.Velocity = vel * 1000000 + Vector3.new(0, 1000000, 0)
+
+            RunService.RenderStepped:Wait()
+            if velocityEnabled and character and character.Parent and root and root.Parent then
+                root.Velocity = vel
+            end
+
+            RunService.Stepped:Wait()
+            if velocityEnabled and character and character.Parent and root and root.Parent then
+                root.Velocity = vel + Vector3.new(0, movel, 0)
+                movel = movel * -1
+            end
+        else
+            wait(0.1)
+        end
+    end
+end
+
+local function teleportHandleToPart(part)
+    local Tool = LocalPlayer.Character:FindFirstChildOfClass("Tool")
+    if not Tool then
+        print("No tool equipped. Please equip a tool and try again.")
+        return
+    end
+    
+    local Handle = Tool:FindFirstChild("Handle")
+    if not Handle then
+        print("Tool has no Handle. This script may not work as intended.")
+        return
+    end
+    
+    local originalCFrame = Handle.CFrame
+    Handle.CFrame = part.CFrame
+    wait(0.05) -- Reduced wait time for faster teleportation
+end
+
+local function teleportHandleToPlayer(player)
+    if player.Character then
+        for _, part in ipairs(player.Character:GetDescendants()) do
+            if part:IsA("BasePart") then
+                teleportHandleToPart(part)
+            end
+        end
+    end
+end
+
+local function getPlayerHRP(player)
+    return player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+end
+
+local function isPlayerAlive(player)
+    local humanoid = player.Character and player.Character:FindFirstChild("Humanoid")
+    return humanoid and humanoid.Health > 0
+end
+
+local function getHRPVelocity(hrp)
+    return hrp and hrp.Velocity.Magnitude or 0
+end
+
+local function isPlayerSitting(player)
+    local humanoid = player.Character and player.Character:FindFirstChild("Humanoid")
+    return humanoid and humanoid.Sit
+end
+
+local velocityThreshold = 50 -- Adjust this value to determine what constitutes a significant velocity increase
+
+-- Main function to run the teleportation
+local function runTeleportation()
+    while true do
+        if teleportEnabled then
+            for _, player in ipairs(Players:GetPlayers()) do
+                if player ~= LocalPlayer and not isPlayerSitting(player) then
+                    local hrp = getPlayerHRP(player)
+                    local initialVelocity = getHRPVelocity(hrp)
+                    
+                    while teleportEnabled and player and player.Parent and isPlayerAlive(player) and getHRPVelocity(hrp) - initialVelocity < velocityThreshold do
+                        teleportHandleToPlayer(player)
+                        wait(0.1)
+                        hrp = getPlayerHRP(player) -- Update HRP reference in case it changed
+                        
+                        -- Check if the player started sitting
+                        if isPlayerSitting(player) then
+                            break
+                        end
+                    end
+                    
+                    wait(0.5) -- Wait before moving to the next player
+                end
+            end
+        else
+            wait(0.1)
+        end
+    end
+end
+
+-- Function to toggle teleportation
+local function toggleTeleportation()
+    teleportEnabled = not teleportEnabled
+    print("Teleportation " .. (teleportEnabled and "enabled" or "disabled"))
+end
+
+-- Function to toggle velocity manipulation
+local function toggleVelocity()
+    velocityEnabled = not velocityEnabled
+    print("Velocity manipulation " .. (velocityEnabled and "enabled" or "disabled"))
+end
+
+-- Set up keyboard controls
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if not gameProcessed then
+        if input.KeyCode == Enum.KeyCode.T then
+            toggleTeleportation()
+        elseif input.KeyCode == Enum.KeyCode.V then
+            toggleVelocity()
+        end
+    end
+end)
+
+-- Start the velocity bypasser and teleportation in separate threads
+coroutine.wrap(velocityBypasser)()
+coroutine.wrap(runTeleportation)()
+
+print("Script loaded. Press 'T' to toggle teleportation, 'V' to toggle velocity manipulation.")
+    
