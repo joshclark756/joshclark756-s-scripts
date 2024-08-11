@@ -1,5 +1,4 @@
 -- Script to delete object in front of cursor when 'X' is pressed and recover with 'Z'
--- Use responsibly and at your own risk
 
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
