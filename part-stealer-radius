@@ -1,0 +1,106 @@
+-- When 'E' is pressed, all non-player parts in a radius will attach to an invisible anchored part,
+-- spin using attachments, and turn off CanCollide for all descendants
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+
+local LocalPlayer = Players.LocalPlayer
+local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+local HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
+
+local RADIUS = 20 -- Adjust this value to change the affected radius
+
+local function createInvisibleAnchor()
+    local anchor = Instance.new("Part")
+    anchor.Anchored = true
+    anchor.CanCollide = false
+    anchor.Transparency = 1
+    anchor.Size = Vector3.new(1, 1, 1)
+    anchor.Parent = workspace
+    
+    local attachment = Instance.new("Attachment")
+    attachment.Parent = anchor
+    
+    return anchor
+end
+
+local invisibleAnchor = createInvisibleAnchor()
+
+local function updateAnchorPosition()
+    if Character and HumanoidRootPart then
+        invisibleAnchor.Position = HumanoidRootPart.Position + Vector3.new(0, 5, 0)
+    end
+end
+
+local function isPlayerPart(part)
+    local model = part:FindFirstAncestorOfClass("Model")
+    return model and Players:GetPlayerFromCharacter(model) ~= nil
+end
+
+local function attachAndSpinPart(part)
+    if part:IsA("BasePart") and not part.Anchored and not isPlayerPart(part) then
+        -- Create attachment for the target part
+        local targetAttachment = part:FindFirstChild("SpinAttachment") or Instance.new("Attachment")
+        targetAttachment.Name = "SpinAttachment"
+        targetAttachment.Parent = part
+        
+        -- Create AlignPosition
+        local alignPosition = Instance.new("AlignPosition")
+        alignPosition.Attachment0 = targetAttachment
+        alignPosition.Attachment1 = invisibleAnchor.Attachment
+        alignPosition.RigidityEnabled = false
+        alignPosition.ReactionForceEnabled = false
+        alignPosition.ApplyAtCenterOfMass = true
+        alignPosition.MaxForce = 1e6
+        alignPosition.MaxVelocity = 100
+        alignPosition.Responsiveness = 10
+        alignPosition.Parent = part
+        
+        -- Create AlignOrientation for stability
+        local alignOrientation = Instance.new("AlignOrientation")
+        alignOrientation.Attachment0 = targetAttachment
+        alignOrientation.Attachment1 = invisibleAnchor.Attachment
+        alignOrientation.RigidityEnabled = false
+        alignOrientation.ReactionTorqueEnabled = true
+        alignOrientation.PrimaryAxisOnly = false
+        alignOrientation.MaxTorque = 1e6
+        alignOrientation.MaxAngularVelocity = 100
+        alignOrientation.Responsiveness = 10
+        alignOrientation.Parent = part
+        
+        part.Anchored = false
+        part.CanCollide = false
+        
+        -- Apply spinning velocity
+        local spinForce = Instance.new("BodyAngularVelocity")
+        spinForce.AngularVelocity = Vector3.new(78, 700, 59)  -- Adjust the values to change spin direction and speed
+        spinForce.MaxTorque = Vector3.new(math.huge, math.huge, math.huge)
+        spinForce.Parent = part
+        
+        -- Turn off CanCollide for all descendants
+        for _, descendant in ipairs(part:GetDescendants()) do
+            if descendant:IsA("BasePart") then
+                descendant.CanCollide = false
+            end
+        end
+    end
+end
+
+local function onKeyPress(input)
+    if input.KeyCode == Enum.KeyCode.E then
+        updateAnchorPosition()
+        
+        local partsInRadius = workspace:GetPartBoundsInRadius(HumanoidRootPart.Position, RADIUS)
+        for _, part in ipairs(partsInRadius) do
+            attachAndSpinPart(part)
+        end
+    end
+end
+
+UserInputService.InputBegan:Connect(onKeyPress)
+
+-- Continuously update anchor position
+RunService.Heartbeat:Connect(updateAnchorPosition)
+
+print("Script loaded successfully. Press 'E' to attach and spin nearby parts!")
