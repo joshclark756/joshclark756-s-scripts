@@ -1,0 +1,50 @@
+-- freeze other script for AutoExec to anchor other players
+-- can be used to cheat in some games
+wait(10)
+-- init
+if not game.IsLoaded(game) then
+   repeat task.wait() until game.IsLoaded(game)
+end
+local UserInputService = game:GetService("UserInputService")
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local StarterGui = game:GetService("StarterGui")
+
+local function anchorPlayers(anchor)
+    for _, player in ipairs(Players:GetPlayers()) do
+        if player ~= Players.LocalPlayer then
+            local character = player.Character
+            if character then
+                local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+                if humanoidRootPart then
+                    humanoidRootPart.Anchored = anchor
+                end
+            end
+        end
+    end
+end
+
+local anchored = false
+
+RunService.Heartbeat:Connect(function()
+    if UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) or UserInputService:IsKeyDown(Enum.KeyCode.RightShift) then
+        if not anchored then
+            anchorPlayers(true)
+            anchored = true
+        end
+    else
+        if anchored then
+            anchorPlayers(false)
+            anchored = false
+        end
+    end
+end)
+
+-- Send notification that the script has been executed
+StarterGui:SetCore("SendNotification", {
+    Title = "Script Executed",
+    Text = "Anchor players script is now active.",
+    Duration = 5
+})
+
+print("AutoExec script loaded. Hold Shift to anchor other players, release to unanchor.")
