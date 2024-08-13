@@ -1,4 +1,4 @@
-# joshclark756-s-scripts
+# joshclark756's scripts
 my scripts will be posted here
 want to contact me?
-joshclark756#7155
+joshclark756 on discord
