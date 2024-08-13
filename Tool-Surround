@@ -1,5 +1,4 @@
---made by joshclark756
---simple to use
+--made by joshclark756 --simple to use
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 
@@ -13,9 +12,18 @@ local rotationSpeed = 0  -- Adjust this value to change rotation speed (likely d
 
 -- Configuration
 local useRemoteFunction = false  -- Set to true to enable remote function
-local remoteFunction = nil -- Replace with the actual remote function when enabled ex: "game:GetService("Players").LocalPlayer.PlayerGui.Main.Frame.Amogus.Amogus.LocalScript.RemoteEvent1" this is from the game you cant say the word
+local remoteFunction = nil -- Replace with the actual remote function when enabled
 local autoEquipTools = true  -- Set to true to automatically equip all tools
 local toolsToGetFromRemote = 0  -- variable for the number of tools to get from remote
+local disabletoolcollision = true
+
+local function disableToolCollision(tool)
+    for _, part in ipairs(tool:GetDescendants()) do
+        if part:IsA("BasePart") then
+            part.CanCollide = false
+        end
+    end
+end
 
 local function positionTools()
     local tools = {}
@@ -38,6 +46,10 @@ local function positionTools()
         local offsetZ = math.sin(angle) * radius
         
         tool.Grip = CFrame.new(offsetX, 0, offsetZ) * CFrame.Angles(0, angle, 0)
+        
+        if disabletoolcollision then
+            disableToolCollision(tool)
+        end
     end
 end
 
@@ -103,6 +115,9 @@ if autoEquipTools then
     wait(1)  -- Wait a short time to ensure all operations are complete
     for _, tool in ipairs(player.Backpack:GetChildren()) do
         if tool:IsA("Tool") then
+            if disabletoolcollision then
+                disableToolCollision(tool)
+            end
             tool.Parent = character
         end
     end
