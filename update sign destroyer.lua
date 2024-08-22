@@ -1,3 +1,5 @@
+-- note this disable the gui for you but not others 
+-- other players may lag
 game:GetService("StarterGui"):SetCore("SendNotification", { 
 	Title = "Notification";
 	Text = "script by joshclark756#7155";
