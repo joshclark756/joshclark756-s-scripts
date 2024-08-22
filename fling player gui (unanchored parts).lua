@@ -1,5 +1,6 @@
--- Modified Fling Player GUI using Unanchored Parts
+-- Fling Player GUI using Unanchored Parts
 -- made by joshclark756
+-- must own parts for it to work
 
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
