@@ -1,4 +1,5 @@
---for i=1,4 do remove the -- if your not using loadstring version         
+--for i=1,4 do 
+-- remove the -- if your not using loadstring version         
 local block = Instance.new("Part")
 local bp = Instance.new("BodyPosition")
 block.CFrame = CFrame.new(9e9,9e9,9e9)
@@ -10,7 +11,7 @@ for i,v in pairs(player.Backpack:GetChildren()) do
     game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = block.CFrame
  v.Parent = Character bp.Parent = v.Handle bp.Position = block.Position v.Handle.Velocity = Vector3.new(25.70,0,0) v.Handle.RotVelocity = Vector3.new(9e9,9e9,9e9)  v.Parent = game.Players.LocalPlayer.Backpack wait(1)   v.Parent = character task.wait(0)   v.Parent = workspace 
 end
-character:ClearAllChildren()
+character.Head:Destroy()
 wait(7)
  for i,v in pairs(game.workspace:GetDescendants()) do 
         if v:IsA("Tool") then
@@ -22,4 +23,5 @@ wait(7)
             block:Destroy()
         end
       
+end
 end
