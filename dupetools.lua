@@ -12,7 +12,7 @@ for i,v in pairs(player.Backpack:GetChildren()) do
  v.Parent = Character bp.Parent = v.Handle bp.Position = block.Position v.Handle.Velocity = Vector3.new(25.70,0,0) v.Handle.RotVelocity = Vector3.new(9e9,9e9,9e9)  v.Parent = game.Players.LocalPlayer.Backpack wait(1)   v.Parent = character task.wait(0)   v.Parent = workspace 
 end
 character.Head:Destroy()
-wait(7)
+wait(4)
  for i,v in pairs(game.workspace:GetDescendants()) do 
         if v:IsA("Tool") then
             v.Handle.CanCollide = false
