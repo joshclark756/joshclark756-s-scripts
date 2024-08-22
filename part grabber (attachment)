@@ -1,3 +1,6 @@
+-- made by joshclark756
+-- to use execute then reset it gives you the tool on spawn
+-- this version unlike the other version will replicate exactly as you see it since it uses attachments
 -- Part Grabber (Attachments Version)
 local Tool = Instance.new("Tool")
 Tool.Name = "AttachmentPartGrabber"
