@@ -1,3 +1,5 @@
+-- modified by joshclark756
+-- i added the tp part to go invisible press alt then press ctrl then press alt again
 local Player = game.Players.LocalPlayer
 local UserInputService = game:GetService("UserInputService")
 local TeleportToggle = false
