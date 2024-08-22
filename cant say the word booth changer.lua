@@ -1,4 +1,5 @@
 -- made by joshclark756
+--https://www.roblox.com/games/10175705301/Cant-Say-the-Word
 local ScreenGui = Instance.new("ScreenGui")
 local Frame = Instance.new("Frame")
 local Title = Instance.new("TextLabel")
