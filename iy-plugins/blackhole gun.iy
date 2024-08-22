@@ -1,0 +1,269 @@
+local Plugin = {
+	["PluginName"] = "blackhole gun",
+	["PluginDescription"] = "gives you a blackhole gun",
+	["Commands"] = {
+		["blackhole gun"] = {
+			["ListName"] = "blackholegun/ bgun",
+			["Description"] = "give you a blackhole gun",
+			["Aliases"] = {"blackholegun","bgun"},
+			["Function"] = function(args, speaker)
+			-- Services
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+
+-- Player and mouse setup
+local player = Players.LocalPlayer
+local mouse = player:GetMouse()
+
+-- Create the tool
+local tool = Instance.new("Tool")
+tool.Name = "Blackhole Gun"
+tool.RequiresHandle = false
+tool.Parent = player.Backpack
+
+-- Create the gun model
+local gunModel = Instance.new("Part")
+gunModel.Name = "Handle"
+gunModel.Size = Vector3.new(1, 0.5, 3)
+gunModel.Color = Color3.new(0, 0, 0)
+gunModel.Material = Enum.Material.Neon
+gunModel.Parent = tool
+
+-- Create visual effects for the gun
+local attachment = Instance.new("Attachment")
+attachment.Position = Vector3.new(0, 0, -1.5)
+attachment.Parent = gunModel
+
+local particleEmitter = Instance.new("ParticleEmitter")
+particleEmitter.Color = ColorSequence.new(Color3.new(0, 0, 0))
+particleEmitter.LightEmission = 1
+particleEmitter.LightInfluence = 0
+particleEmitter.Size = NumberSequence.new({NumberSequenceKeypoint.new(0, 0.5), NumberSequenceKeypoint.new(1, 0)})
+particleEmitter.Texture = "rbxassetid://241685484"
+particleEmitter.Transparency = NumberSequence.new({NumberSequenceKeypoint.new(0, 0), NumberSequenceKeypoint.new(1, 1)})
+particleEmitter.EmissionDirection = Enum.NormalId.Back
+particleEmitter.Lifetime = NumberRange.new(0.5, 1)
+particleEmitter.Rate = 50
+particleEmitter.Speed = NumberRange.new(5, 10)
+particleEmitter.SpreadAngle = Vector2.new(15, 15)
+particleEmitter.Parent = attachment
+
+-- Blackhole functionality
+local blackhole = nil
+local affectedParts = {}
+
+-- Configuration for BodyAngularVelocity
+local angularVelocityConfig = {
+    maxTorque = Vector3.new(400000, 400000, 400000),
+    angularVelocity = Vector3.new(30,50,78)
+}
+
+local function createBlackhole(position)
+    if blackhole then
+        blackhole:Destroy()
+    end
+    
+    blackhole = Instance.new("Part")
+    blackhole.Name = "Blackhole"
+    blackhole.Shape = Enum.PartType.Ball
+    blackhole.Size = Vector3.new(2, 2, 2)
+    blackhole.Color = Color3.new(0, 0, 0)
+    blackhole.Material = Enum.Material.Neon
+    blackhole.CanCollide = false
+    blackhole.Anchored = true
+    blackhole.Position = position
+    blackhole.Parent = workspace
+    
+    local bhAttachment = Instance.new("Attachment")
+    bhAttachment.Parent = blackhole
+    
+    local bhParticles = particleEmitter:Clone()
+    bhParticles.Parent = bhAttachment
+    bhParticles.EmissionDirection = Enum.NormalId.Top
+    bhParticles.Speed = NumberRange.new(0, 5)
+    bhParticles.Rate = 100
+end
+
+local function removeBlackhole()
+    if blackhole then
+        blackhole:Destroy()
+        blackhole = nil
+    end
+    
+    for _, v in pairs(affectedParts) do
+        if v.BodyPosition then
+            v.BodyPosition:Destroy()
+        end
+        if v.BodyAngularVelocity then
+            v.BodyAngularVelocity:Destroy()
+        end
+    end
+    
+    affectedParts = {}
+    RunService:UnbindFromRenderStep("BlackholeEffect")
+end
+
+local function onActivated()
+    local target = mouse.Hit.Position
+    createBlackhole(target)
+    
+    RunService:UnbindFromRenderStep("BlackholeEffect")
+    RunService:BindToRenderStep("BlackholeEffect", Enum.RenderPriority.Camera.Value, function()
+        if blackhole then
+            for _, part in pairs(workspace:GetDescendants()) do
+                if part:IsA("BasePart") and not part.Anchored and part ~= blackhole and not player.Character:IsAncestorOf(part) then
+                    local vector = (blackhole.Position - part.Position)
+                    local distance = vector.Magnitude
+                    
+                    if distance < 50 then
+                        if not affectedParts[part] then
+                            local bodyPosition = Instance.new("BodyPosition")
+                            bodyPosition.Position = blackhole.Position
+                            bodyPosition.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+                            bodyPosition.P = 10000
+                            bodyPosition.Parent = part
+                            
+                            local bodyAngularVelocity = Instance.new("BodyAngularVelocity")
+                            bodyAngularVelocity.MaxTorque = angularVelocityConfig.maxTorque
+                            bodyAngularVelocity.AngularVelocity = angularVelocityConfig.angularVelocity
+                            bodyAngularVelocity.Parent = part
+                            
+                            affectedParts[part] = {
+                                BodyPosition = bodyPosition,
+                                BodyAngularVelocity = bodyAngularVelocity
+                            }
+                        else
+                            affectedParts[part].BodyPosition.Position = blackhole.Position
+                        end
+                    elseif affectedParts[part] then
+                        affectedParts[part].BodyPosition:Destroy()
+                        affectedParts[part].BodyAngularVelocity:Destroy()
+                        affectedParts[part] = nil
+                    end
+                end
+            end
+            
+            -- Update blackhole position based on mouse position
+            local newPosition = mouse.Hit.Position
+            blackhole.Position = newPosition
+            
+            -- Update BodyPositions for affected parts
+            for part, bodyControls in pairs(affectedParts) do
+                if not bodyControls.BodyPosition or not bodyControls.BodyPosition:IsA("BodyPosition") then
+                    bodyControls.BodyPosition = Instance.new("BodyPosition")
+                    bodyControls.BodyPosition.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+                    bodyControls.BodyPosition.P = 10000
+                    bodyControls.BodyPosition.Parent = part
+                end
+                
+                if not bodyControls.BodyAngularVelocity or not bodyControls.BodyAngularVelocity:IsA("BodyAngularVelocity") then
+                    bodyControls.BodyAngularVelocity = Instance.new("BodyAngularVelocity")
+                    bodyControls.BodyAngularVelocity.MaxTorque = angularVelocityConfig.maxTorque
+                    bodyControls.BodyAngularVelocity.AngularVelocity = angularVelocityConfig.angularVelocity
+                    bodyControls.BodyAngularVelocity.Parent = part
+                end
+                
+                bodyControls.BodyPosition.Position = newPosition
+            end
+        else
+            removeBlackhole()
+            return
+        end
+    end)
+end
+
+local function onDeactivated()
+    removeBlackhole()
+end
+
+tool.Activated:Connect(onActivated)
+tool.Deactivated:Connect(onDeactivated)
+
+local function onRightClick()
+    removeBlackhole()
+end
+
+mouse.Button2Down:Connect(onRightClick)
+
+
+local function onUnequipped()
+    removeBlackhole()
+    for _, v in pairs(affectedParts) do
+        if v.BodyPosition then
+            v.BodyPosition:Destroy()
+        end
+        if v.BodyAngularVelocity then
+            v.BodyAngularVelocity:Destroy()
+        end
+    end
+    affectedParts = {}
+end
+
+tool.Unequipped:Connect(onUnequipped)
+
+local UserInputService = game:GetService("UserInputService")
+
+local function deleteBodyPositionsAndAngularVelocities()
+    for _, v in pairs(game:GetDescendants()) do
+        if v:IsA("BodyPosition") or v:IsA("BodyAngularVelocity") then
+            v:Destroy()
+        end
+    end
+end
+
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if not gameProcessed and input.KeyCode == Enum.KeyCode.E then
+        deleteBodyPositionsAndAngularVelocities()
+        print("All BodyPositions and BodyAngularVelocities have been deleted!")
+    end
+end)
+
+-- Configuration UI (you can expand this to make it more interactive)
+local function createConfigUI()
+    local screenGui = Instance.new("ScreenGui")
+    screenGui.Parent = game.CoreGui
+
+    local frame = Instance.new("Frame")
+    frame.Size = UDim2.new(0, 200, 0, 100)
+    frame.Position = UDim2.new(1, -220, 0, 20)
+    frame.BackgroundColor3 = Color3.new(0, 0, 0)
+    frame.BackgroundTransparency = 0.5
+    frame.Parent = screenGui
+
+    local title = Instance.new("TextLabel")
+    title.Text = "Blackhole Config"
+    title.Size = UDim2.new(1, 0, 0, 30)
+    title.BackgroundTransparency = 1
+    title.TextColor3 = Color3.new(1, 1, 1)
+    title.Parent = frame
+
+    local spinSpeedLabel = Instance.new("TextLabel")
+    spinSpeedLabel.Text = "Spin Speed: 10"
+    spinSpeedLabel.Size = UDim2.new(1, 0, 0, 30)
+    spinSpeedLabel.Position = UDim2.new(0, 0, 0, 30)
+    spinSpeedLabel.BackgroundTransparency = 1
+    spinSpeedLabel.TextColor3 = Color3.new(1, 1, 1)
+    spinSpeedLabel.Parent = frame
+
+    local spinSpeedSlider = Instance.new("TextBox")
+    spinSpeedSlider.Text = "10"
+    spinSpeedSlider.Size = UDim2.new(1, -20, 0, 30)
+    spinSpeedSlider.Position = UDim2.new(0, 10, 0, 60)
+    spinSpeedSlider.BackgroundColor3 = Color3.new(0.2, 0.2, 0.2)
+    spinSpeedSlider.TextColor3 = Color3.new(1, 1, 1)
+    spinSpeedSlider.Parent = frame
+
+    spinSpeedSlider.FocusLost:Connect(function()
+        local newSpeed = tonumber(spinSpeedSlider.Text) or 10
+        angularVelocityConfig.angularVelocity = Vector3.new(0, newSpeed, 0)
+        spinSpeedLabel.Text = "Spin Speed: " .. newSpeed
+    end)
+end
+
+createConfigUI()	
+			end,
+		},
+	},
+}
+
+return Plugin

@@ -1,0 +1,21 @@
+local Plugin = {
+	["PluginName"] = "partcollision",
+	["PluginDescription"] = "enables all partcollision",
+	["Commands"] = {
+		["partcollision"] = {
+			["ListName"] = "partcollision/collideparts",
+			["Description"] = "dd",
+			["Aliases"] = {"partcollision"},
+			["Function"] = function(args, speaker)
+			for i,v in pairs(game:GetDescendants()) do
+    if v:IsA("Part") or v:IsA("BasePart")  then do
+        v.CanCollide = true
+    end
+    end
+end	
+			end,
+		},
+	},
+}
+
+return Plugin
