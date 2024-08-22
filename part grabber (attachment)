@@ -1,0 +1,218 @@
+-- Part Grabber (Attachments Version)
+local Tool = Instance.new("Tool")
+Tool.Name = "AttachmentPartGrabber"
+Tool.RequiresHandle = true
+
+-- Create a handle for the tool
+local handle = Instance.new("Part")
+handle.Name = "Handle"
+handle.BrickColor = BrickColor.new("Really black")
+handle.Material = Enum.Material.Metal
+handle.CanCollide = false
+handle.Parent = Tool
+handle.Transparency = 1
+
+-- Create an attachment for the handle
+local handleAttachment = Instance.new("Attachment")
+handleAttachment.Name = "HandleAttachment"
+handleAttachment.Parent = handle
+
+local heldParts = {}
+local rightHand = nil
+
+local function updateRightHand()
+    local player = game.Players.LocalPlayer
+    local character = player.Character or player.CharacterAdded:Wait()
+    rightHand = character:FindFirstChild("RightHand") or character:FindFirstChild("Right Arm")
+end
+
+local function removeExistingAttachments(part)
+    for _, child in pairs(part:GetChildren()) do
+        if child:IsA("Attachment") or child:IsA("AlignPosition") or child:IsA("BodyAngularVelocity") then
+            child:Destroy()
+        end
+    end
+end
+
+local function onActivated()
+    local player = game.Players.LocalPlayer
+    local mouse = player:GetMouse()
+    
+    if mouse.Target and mouse.Target:IsA("BasePart") and not mouse.Target.Anchored then
+        local targetPart = mouse.Target
+        
+        if heldParts[targetPart] then
+            -- Drop the part if it's already held
+            heldParts[targetPart].CanCollide = true
+            heldParts[targetPart].Anchored = false
+            
+            -- Remove the attachment, AlignPosition, and BodyAngularVelocity
+            removeExistingAttachments(targetPart)
+            
+            heldParts[targetPart] = nil
+        else
+            -- Pick up new part
+            removeExistingAttachments(targetPart)
+            
+            heldParts[targetPart] = targetPart
+            targetPart.CanCollide = false
+            targetPart.Anchored = false
+            
+            -- Create an attachment for the part
+            local partAttachment = Instance.new("Attachment")
+            partAttachment.Name = "PartAttachment"
+            partAttachment.Parent = targetPart
+            
+            -- Create AlignPosition to connect part to handle
+            local alignPosition = Instance.new("AlignPosition")
+            alignPosition.Name = "AlignPosition"
+            alignPosition.Attachment0 = partAttachment
+            alignPosition.Attachment1 = handleAttachment
+            alignPosition.RigidityEnabled = true
+            alignPosition.Parent = targetPart
+            
+            -- Delete TouchInterest if it exists
+            local touchInterest = targetPart:FindFirstChildOfClass("TouchTransmitter")
+            if touchInterest then
+                touchInterest:Destroy()
+            end
+        end
+    end
+end
+
+local function onEquipped()
+    updateRightHand()
+    
+    game:GetService("RunService").Heartbeat:Connect(function()
+        for part, _ in pairs(heldParts) do
+            if part and rightHand then
+                -- Update part position relative to the right hand
+                local alignPosition = part:FindFirstChild("AlignPosition")
+                if alignPosition then
+                    alignPosition.Position = rightHand.Position + rightHand.CFrame.LookVector * 3
+                end
+            end
+        end
+    end)
+end
+
+local function onUnequipped()
+    for part, _ in pairs(heldParts) do
+        part.CanCollide = true
+        part.Anchored = false
+        
+        -- Remove the attachment, AlignPosition, and BodyAngularVelocity
+        removeExistingAttachments(part)
+    end
+    heldParts = {}
+end
+
+-- New function to handle E key press
+local function onKeyPress(key)
+    if key:lower() == "e" then
+        for part, _ in pairs(heldParts) do
+            local bodyAngularVelocity = part:FindFirstChild("BodyAngularVelocity")
+            if not bodyAngularVelocity then
+                bodyAngularVelocity = Instance.new("BodyAngularVelocity")
+                bodyAngularVelocity.Parent = part
+            end
+            bodyAngularVelocity.AngularVelocity = Vector3.new(0, 10, 0) -- Adjust angular velocity as needed
+            bodyAngularVelocity.MaxTorque = Vector3.new(1000000, 1000000, 1000000) -- Adjust max torque as needed
+        end
+    end
+end
+
+Tool.Activated:Connect(onActivated)
+Tool.Equipped:Connect(onEquipped)
+Tool.Unequipped:Connect(onUnequipped)
+
+-- Function to give the tool to the player
+local function giveTool(player)
+    if player.Character then
+        Tool.Parent = player:FindFirstChild("Backpack") or player.Character
+    end
+end
+
+-- Give the tool to the player and set up auto-respawn
+local player = game.Players.LocalPlayer
+
+-- Give tool on initial spawn
+if player.Character then
+    giveTool(player)
+end
+
+-- Set up auto-respawn and update right hand reference
+player.CharacterAdded:Connect(function(character)
+    updateRightHand()
+    giveTool(player)
+end)
+
+-- Store the tool in ReplicatedStorage to persist between respawns
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+Tool.Parent = ReplicatedStorage
+
+-- Create a LocalScript to handle giving the tool to the player and key press events
+local LocalScript = Instance.new("LocalScript")
+LocalScript.Parent = Tool
+
+LocalScript.Source = [[
+local player = game.Players.LocalPlayer
+local tool = script.Parent
+
+-- Function to give the tool to the player
+local function giveTool()
+    if player.Character then
+        tool.Parent = player:FindFirstChild("Backpack") or player.Character
+    end
+end
+
+-- Give tool on initial spawn
+if player.Character then
+    giveTool()
+end
+
+-- Set up auto-respawn
+player.CharacterAdded:Connect(function(character)
+    giveTool()
+end)
+
+local function onCharacterAdded(character)
+    wait(1) -- Wait a short time to ensure the character is fully loaded
+    if not player:FindFirstChild("Backpack") then
+        player.CharacterAdded:Wait()
+    end
+    tool.Parent = player.Backpack
+    
+    -- Update right hand reference
+    local rightHand = character:FindFirstChild("RightHand") or character:FindFirstChild("Right Arm")
+    if rightHand then
+        tool.RightHandReference.Value = rightHand
+    end
+end
+
+if player.Character then
+    onCharacterAdded(player.Character)
+end
+
+player.CharacterAdded:Connect(onCharacterAdded)
+
+-- Set up key press event
+game:GetService("UserInputService").InputBegan:Connect(function(input, gameProcessed)
+    if not gameProcessed and input.KeyCode == Enum.KeyCode.E then
+        tool.OnKeyPress:Fire("e")
+    end
+end)
+]]
+
+-- Create a new RemoteEvent to handle key press events
+local OnKeyPress = Instance.new("RemoteEvent")
+OnKeyPress.Name = "OnKeyPress"
+OnKeyPress.Parent = Tool
+
+-- Connect the OnKeyPress event to the onKeyPress function
+
+
+-- Add a RightHandReference object value to the tool
+local RightHandReference = Instance.new("ObjectValue")
+RightHandReference.Name = "RightHandReference"
+RightHandReference.Parent = Tool
