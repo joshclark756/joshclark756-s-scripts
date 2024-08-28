@@ -1,0 +1,59 @@
+local Plugin = {
+    ["PluginName"] = "UnanchoredPartsManager",
+    ["PluginDescription"] = "Manage and manipulate unanchored parts in the game",
+    ["Commands"] = {
+        ["bringparts"] = {
+            ["ListName"] = "bringparts",
+            ["Description"] = "Teleports all unanchored parts to the player",
+            ["Aliases"] = {"bp", "bring"},
+            ["Function"] = function(args, speaker)
+                local player = game.Players.LocalPlayer
+                local character = player.Character or player.CharacterAdded:Wait()
+                local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+                
+                for _, part in pairs(workspace:GetDescendants()) do
+                    if part:IsA("BasePart") and not part.Anchored and part:IsDescendantOf(character) == false then
+                        part.CFrame = humanoidRootPart.CFrame
+                    end
+                end
+            end,
+        },
+        ["flingparts"] = {
+            ["ListName"] = "flingparts",
+            ["Description"] = "Applies a random velocity to all unanchored parts",
+            ["Aliases"] = {"fp", "fling"},
+            ["Function"] = function(args, speaker)
+             local player = game.Players.LocalPlayer
+                local character = player.Character or player.CharacterAdded:Wait()
+                for _, part in pairs(workspace:GetDescendants()) do
+                    if part:IsA("BasePart") and not part.Anchored and part:IsDescendantOf(character) == false then
+                        part.Velocity = Vector3.new(math.random(-100, 1009), math.random(50, 1000), math.random(-100, 1000))
+                    end
+                end
+            end,
+        },
+        ["getownership"] = {
+            ["ListName"] = "getownership",
+            ["Description"] = "Attempts to gain ownership of unanchored parts",
+            ["Aliases"] = {"go", "own"},
+            ["Function"] = function(args, speaker)
+                local player = game.Players.LocalPlayer
+                local character = player.Character or player.CharacterAdded:Wait()
+                local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+                local originalPosition = humanoidRootPart.Position
+                
+                for _, part in pairs(workspace:GetDescendants()) do
+                    if part:IsA("BasePart") and not part.Anchored and part:IsDescendantOf(character) == false then
+                        local partPosition = part.Position
+                        humanoidRootPart.CFrame = CFrame.new(partPosition)
+                        wait(0.1)  -- Small delay to ensure ownership transfer
+                    end
+                end
+                
+                humanoidRootPart.CFrame = CFrame.new(originalPosition)
+            end,
+        },
+    },
+}
+
+return Plugin

@@ -1,0 +1,63 @@
+local Plugin = {
+    ["PluginName"] = "ClickDetectorAura",
+    ["PluginDescription"] = "Creates an aura that automatically fires ClickDetector events for nearby parts, with separate enable and disable commands and customizable size",
+    ["Commands"] = {
+        ["clickaura"] = {
+            ["ListName"] = "clickaura",
+            ["Description"] = "Enable the click detector aura with optional size parameter",
+            ["Aliases"] = {"eca", "enablecaura"},
+            ["Function"] = function(args, speaker)
+                local player = game.Players.LocalPlayer
+                local character = player.Character or player.CharacterAdded:Wait()
+                local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+                
+                if _G.auraEnabled then
+                    print("Click detector aura is already enabled")
+                    return
+                end
+                
+                _G.auraEnabled = true
+                _G.auraSize = tonumber(args[1]) or 10 -- Use the provided size or default to 10
+                
+                local function fireClick(clickDetector)
+                    if clickDetector:IsA("ClickDetector") then
+                        fireclickdetector(clickDetector)
+                    end
+                end
+                
+                local function checkNearbyParts()
+                    while _G.auraEnabled do
+                        local nearbyParts = workspace:GetPartBoundsInRadius(humanoidRootPart.Position, _G.auraSize)
+                        for _, part in ipairs(nearbyParts) do
+                            local clickDetector = part:FindFirstChildOfClass("ClickDetector")
+                            if clickDetector then
+                                fireClick(clickDetector)
+                            end
+                        end
+                        task.wait(0.1) -- Adjust this value to change how often the aura checks for parts
+                    end
+                end
+                
+                task.spawn(checkNearbyParts)
+                print("Click detector aura enabled with size: " .. _G.auraSize)
+            end,
+        },
+        ["unclickaura"] = {
+            ["ListName"] = "unclickaura",
+            ["Description"] = "Disable the click detector aura",
+            ["Aliases"] = {"dca", "disablecaura"},
+            ["Function"] = function(args, speaker)
+                if not _G.auraEnabled then
+                    print("Click detector aura is already disabled")
+                    return
+                end
+                
+                _G.auraEnabled = false
+                print("Click detector aura disabled")
+            end,
+        },
+    },
+}
+
+return Plugin
+    

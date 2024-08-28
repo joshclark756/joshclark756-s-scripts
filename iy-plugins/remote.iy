@@ -1,0 +1,42 @@
+local Plugin = {
+	["PluginName"] = "RemoteFirer",
+	["PluginDescription"] = "Fire remote events with customizable arguments",
+	["Commands"] = {
+		["fireremote"] = {
+			["ListName"] = "fireremote",
+			["Description"] = "Fire a specific remote or all remotes with custom text",
+			["Aliases"] = {"fr", "remotefire"},
+			["Function"] = function(args, speaker)
+				local remoteName = args[1]
+				local fireText = table.concat(args, " ", 2) or ""
+				
+				local function fireRemote(remote)
+					if remote:IsA("RemoteEvent") then
+						remote:FireServer(fireText)
+						print("Fired remote: " .. remote.Name .. " with text: " .. fireText)
+					end
+				end
+				
+				if remoteName == "all" then
+					for _, v in pairs(game:GetDescendants()) do
+						fireRemote(v)
+					end
+					print("Fired all remotes with text: " .. fireText)
+				else
+					local found = false
+					for _, v in pairs(game:GetDescendants()) do
+						if v:IsA("RemoteEvent") and v.Name == remoteName then
+							fireRemote(v)
+							found = true
+						end
+					end
+					if not found then
+						print("No remote found with name: " .. remoteName)
+					end
+				end
+			end,
+		},
+	},
+}
+
+return Plugin

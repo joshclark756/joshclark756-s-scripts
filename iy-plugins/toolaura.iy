@@ -1,0 +1,110 @@
+local Plugin = {
+    ["PluginName"] = "skill aura",
+    ["PluginDescription"] = "Creates an aura that automatically fires TouchInterest events from the currently held tool to other players' HumanoidRootParts within range, with optional visible representation",
+    ["Commands"] = {
+        ["skillaura"] = {
+            ["ListName"] = "skillaura",
+            ["Description"] = "Enable the tool touch aura with optional size parameter and visibility",
+            ["Aliases"] = {"killaura", "toolaura"},
+            ["Function"] = function(args, speaker)
+                local player = game.Players.LocalPlayer
+                local character = player.Character or player.CharacterAdded:Wait()
+
+                if _G.toolAuraEnabled then
+                    print("Tool touch aura is already enabled")
+                    return
+                end
+
+                _G.toolAuraEnabled = true
+                _G.toolAuraSize = tonumber(args[1]) or 10 -- Use the provided size or default to 10
+                _G.toolAuraVisible = args[2] == "true" -- Set visibility based on the second argument
+
+                local function fireToolTouch(targetRootPart)
+                    local tool = character:FindFirstChildOfClass("Tool")
+                    if tool and tool:FindFirstChild("Handle") then
+                        firetouchinterest(tool.Handle, targetRootPart, 0)
+                        task.wait()
+                        firetouchinterest(tool.Handle, targetRootPart, 1)
+                    end
+                end
+
+                local function createVisualAura()
+                    if not _G.toolAuraVisible then return end
+                    
+                    local aura = Instance.new("Part")
+                    aura.Name = "ToolAuraVisualization"
+                    aura.Shape = Enum.PartType.Ball
+                    aura.Size = Vector3.new(_G.toolAuraSize * 2, _G.toolAuraSize * 2, _G.toolAuraSize * 2)
+                    aura.Color = Color3.fromRGB(0, 255, 0)
+                    aura.Material = Enum.Material.ForceField
+                    aura.Transparency = 0.8
+                    aura.CanCollide = false
+                    aura.Anchored = true
+                    aura.Parent = character
+
+                    local function updateAuraPosition()
+                        while _G.toolAuraEnabled and aura and aura.Parent do
+                            aura.CFrame = character.HumanoidRootPart.CFrame
+                            task.wait()
+                        end
+                    end
+
+                    task.spawn(updateAuraPosition)
+                end
+
+                local function checkNearbyPlayers()
+                    while _G.toolAuraEnabled do
+                        local tool = character:FindFirstChildOfClass("Tool")
+                        if tool then
+                            for _, otherPlayer in ipairs(game.Players:GetPlayers()) do
+                                if otherPlayer ~= player then
+                                    local otherCharacter = otherPlayer.Character
+                                    if otherCharacter then
+                                        local otherRootPart = otherCharacter:FindFirstChild("HumanoidRootPart")
+                                        if otherRootPart then
+                                            local distance = (character.HumanoidRootPart.Position - otherRootPart.Position).Magnitude
+                                            if distance <= _G.toolAuraSize then
+                                                fireToolTouch(otherRootPart)
+                                            end
+                                        end
+                                    end
+                                end
+                            end
+                        end
+                        task.wait(0.1) -- Adjust this value to change how often the aura checks for players
+                    end
+                end
+
+                task.spawn(checkNearbyPlayers)
+                createVisualAura()
+                print("Tool touch aura enabled with size: " .. _G.toolAuraSize .. ", Visible: " .. tostring(_G.toolAuraVisible))
+            end,
+        },
+        ["unskillaura"] = {
+            ["ListName"] = "unskillaura",
+            ["Description"] = "Disable the tool touch aura",
+            ["Aliases"] = {"untoolsaura", "disabletooltouchaura"},
+            ["Function"] = function(args, speaker)
+                if not _G.toolAuraEnabled then
+                    print("Tool touch aura is already disabled")
+                    return
+                end
+
+                _G.toolAuraEnabled = false
+                
+                -- Remove visual aura if it exists
+                local character = game.Players.LocalPlayer.Character
+                if character then
+                    local aura = character:FindFirstChild("ToolAuraVisualization")
+                    if aura then
+                        aura:Destroy()
+                    end
+                end
+
+                print("Tool touch aura disabled")
+            end,
+        },
+    },
+}
+
+return Plugin

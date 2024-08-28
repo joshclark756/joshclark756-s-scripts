@@ -1,0 +1,21 @@
+local Plugin = {
+    ["PluginName"] = "SilentChat",
+    ["PluginDescription"] = "Allows sending chat messages silently",
+    ["Commands"] = {
+        ["silentchat"] = {
+            ["ListName"] = "silentchat",
+            ["Description"] = "Send a chat message silently",
+            ["Aliases"] = {"sc", "silent"},
+            ["Function"] = function(args, speaker)
+                local message = table.concat(args, " ")
+                if message and message ~= "" then
+                    game.Players:Chat(message)
+                else
+                    print("Usage: ;silentchat [message]")
+                end
+            end,
+        },
+    },
+}
+
+return Plugin

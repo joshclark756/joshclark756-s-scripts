@@ -1,0 +1,41 @@
+local Plugin = {
+	["PluginName"] = "lagswitch",
+	["PluginDescription"] = "enables lagswitch",
+	["Commands"] = {
+		["lagswitch"] = {
+			["ListName"] = "lagswitch",
+			["Description"] = "",
+			["Aliases"] = {"lswitch","shifttolag"},
+			["Function"] = function(args, speaker)
+			
+local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+
+local function setIncomingReplicationLag(value)
+    if RunService:IsClient() then
+        settings().Network.IncomingReplicationLag = value
+    end
+end
+
+local function onInputBegan(input, gameProcessed)
+    if input.KeyCode == Enum.KeyCode.LeftShift or input.KeyCode == Enum.KeyCode.RightShift then
+        setIncomingReplicationLag(9999999)
+    end
+end
+
+local function onInputEnded(input, gameProcessed)
+    if input.KeyCode == Enum.KeyCode.LeftShift or input.KeyCode == Enum.KeyCode.RightShift then
+        setIncomingReplicationLag(0)
+    end
+end
+
+UserInputService.InputBegan:Connect(onInputBegan)
+UserInputService.InputEnded:Connect(onInputEnded)
+
+print("Shift key exploit script loaded. Hold Shift to increase lag, release to reset.")
+			end,
+		},
+	},
+}
+
+return Plugin

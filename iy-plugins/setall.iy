@@ -1,0 +1,57 @@
+
+local Plugin = {
+    ["PluginName"] = "SetAllValues",
+    ["PluginDescription"] = "Set all values for certain types of instances",
+    ["Commands"] = {
+        ["setall"] = {
+            ["ListName"] = "setall",
+            ["Description"] = "Set a specific value for all instances of a given type",
+            ["Aliases"] = {"setallvalues", "setallprops","setall"},
+            ["Function"] = function(args, speaker)
+                local instanceType = args[1]
+                local propertyName = args[2]
+                local propertyValue = args[3]
+                
+                if not instanceType or not propertyName or not propertyValue then
+                    return "Usage: ;setall [InstanceType] [PropertyName] [PropertyValue]"
+                end
+                
+                local function stringToValue(str)
+                    local num = tonumber(str)
+                    if num then return num end
+                    
+                    if str:lower() == "true" then return true end
+                    if str:lower() == "false" then return false end
+                    
+                    if str:match("^[%d,%.]+$") then
+                        local values = {}
+                        for value in str:gmatch("[^,]+") do
+                            table.insert(values, tonumber(value))
+                        end
+                        if #values == 3 then
+                            return Vector3.new(unpack(values))
+                        end
+                    end
+                    
+                    return str
+                end
+                
+                local value = stringToValue(propertyValue)
+                local count = 0
+                
+                for _, instance in pairs(game:GetDescendants()) do
+                    if instance.ClassName:lower() == instanceType:lower() then
+                        pcall(function()
+                            instance[propertyName] = value
+                            count = count + 1
+                        end)
+                    end
+                end
+                
+                return "Set " .. propertyName .. " to " .. tostring(value) .. " for " .. count .. " " .. instanceType .. " instances."
+            end,
+        },
+    },
+}
+
+return Plugin
