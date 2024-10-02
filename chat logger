@@ -1,0 +1,142 @@
+--- made by joshclark756
+--- selecteable + downloadable chat logger
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local UserInputService = game:GetService("UserInputService")
+
+local chatEvents = ReplicatedStorage:WaitForChild("DefaultChatSystemChatEvents")
+local onMessageEvent = chatEvents:WaitForChild("OnMessageDoneFiltering")
+
+local loggedMessages = {}
+
+-- Create ScreenGui
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+
+-- Create main frame
+local MainFrame = Instance.new("Frame")
+MainFrame.Size = UDim2.new(0, 400, 0, 300)
+MainFrame.Position = UDim2.new(0.5, -200, 0.5, -150)
+MainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+MainFrame.BorderSizePixel = 2
+MainFrame.BorderColor3 = Color3.fromRGB(0, 255, 0)
+MainFrame.Parent = ScreenGui
+
+-- Make the frame draggable
+local Dragging = false
+local DragStart = nil
+local StartPos = nil
+
+MainFrame.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        Dragging = true
+        DragStart = input.Position
+        StartPos = MainFrame.Position
+    end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+    if Dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+        local Delta = input.Position - DragStart
+        MainFrame.Position = UDim2.new(
+            StartPos.X.Scale,
+            StartPos.X.Offset + Delta.X,
+            StartPos.Y.Scale,
+            StartPos.Y.Offset + Delta.Y
+        )
+    end
+end)
+
+UserInputService.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        Dragging = false
+    end
+end)
+
+-- Create title bar
+local TitleBar = Instance.new("TextLabel")
+TitleBar.Size = UDim2.new(1, 0, 0, 30)
+TitleBar.BackgroundColor3 = Color3.fromRGB(0, 100, 0)
+TitleBar.TextColor3 = Color3.fromRGB(255, 255, 255)
+TitleBar.Font = Enum.Font.SourceSansBold
+TitleBar.TextSize = 18
+TitleBar.Text = "Chat Logger"
+TitleBar.Parent = MainFrame
+
+-- Create close button
+local CloseButton = Instance.new("TextButton")
+CloseButton.Size = UDim2.new(0, 30, 0, 30)
+CloseButton.Position = UDim2.new(1, -30, 0, 0)
+CloseButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+CloseButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+CloseButton.Font = Enum.Font.SourceSansBold
+CloseButton.TextSize = 18
+CloseButton.Text = "X"
+CloseButton.Parent = MainFrame
+
+-- Close button functionality
+CloseButton.MouseButton1Click:Connect(function()
+    ScreenGui:Destroy()
+end)
+
+-- Create chat log display
+local ChatLogDisplay = Instance.new("ScrollingFrame")
+ChatLogDisplay.Size = UDim2.new(1, -20, 1, -80)
+ChatLogDisplay.Position = UDim2.new(0, 10, 0, 40)
+ChatLogDisplay.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
+ChatLogDisplay.BorderSizePixel = 0
+ChatLogDisplay.ScrollBarThickness = 8
+ChatLogDisplay.Parent = MainFrame
+
+local ChatLogText = Instance.new("TextBox")
+ChatLogText.Size = UDim2.new(1, -16, 1, 0)
+ChatLogText.BackgroundTransparency = 1
+ChatLogText.TextColor3 = Color3.fromRGB(0, 255, 0)
+ChatLogText.Font = Enum.Font.SourceSans
+ChatLogText.TextSize = 14
+ChatLogText.TextXAlignment = Enum.TextXAlignment.Left
+ChatLogText.TextYAlignment = Enum.TextYAlignment.Top
+ChatLogText.TextWrapped = true
+ChatLogText.Text = ""
+ChatLogText.ClearTextOnFocus = false
+ChatLogText.TextEditable = false
+ChatLogText.Parent = ChatLogDisplay
+
+-- Create download button
+local DownloadButton = Instance.new("TextButton")
+DownloadButton.Size = UDim2.new(0, 150, 0, 30)
+DownloadButton.Position = UDim2.new(0.5, -75, 1, -35)
+DownloadButton.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
+DownloadButton.TextColor3 = Color3.fromRGB(0, 0, 0)
+DownloadButton.Font = Enum.Font.SourceSansBold
+DownloadButton.TextSize = 18
+DownloadButton.Text = "Download Chat Log"
+DownloadButton.Parent = MainFrame
+
+local function logMessage(message)
+    local logEntry = string.format("%s: %s", message.FromSpeaker, message.Message)
+    table.insert(loggedMessages, logEntry)
+    
+    -- Update GUI
+    ChatLogText.Text = ChatLogText.Text .. logEntry .. "\n"
+    ChatLogDisplay.CanvasSize = UDim2.new(0, 0, 0, ChatLogText.TextBounds.Y)
+    ChatLogDisplay.CanvasPosition = Vector2.new(0, ChatLogDisplay.CanvasPosition.Y + ChatLogText.TextBounds.Y)
+end
+
+onMessageEvent.OnClientEvent:Connect(function(messageObj, channelName)
+    logMessage(messageObj)
+end)
+
+-- Function to save logged messages to a file
+local function saveLoggedMessages()
+    local logContent = table.concat(loggedMessages, "\n")
+    local gameName = game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId).Name
+    local sanitizedGameName = gameName:gsub("[^%w%s-_]", "") -- Remove special characters
+    local fileName = sanitizedGameName .. "_chat_log.txt"
+    writefile(fileName, logContent)
+    print("Chat log saved to '" .. fileName .. "'")
+end
+
+DownloadButton.MouseButton1Click:Connect(function()
+    saveLoggedMessages()
+end)
