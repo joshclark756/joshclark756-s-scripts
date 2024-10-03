@@ -13,7 +13,7 @@ local maxDisplayMessages = 15 -- Maximum number of messages to display in the GU
 
 -- Create ScreenGui
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+ScreenGui.Parent = game.CoreGui
 
 -- Create main frame
 local MainFrame = Instance.new("Frame")
