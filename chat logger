@@ -8,6 +8,8 @@ local chatEvents = ReplicatedStorage:WaitForChild("DefaultChatSystemChatEvents")
 local onMessageEvent = chatEvents:WaitForChild("OnMessageDoneFiltering")
 
 local loggedMessages = {}
+local displayedMessages = {}
+local maxDisplayMessages = 15 -- Maximum number of messages to display in the GUI
 
 -- Create ScreenGui
 local ScreenGui = Instance.new("ScreenGui")
@@ -117,8 +119,14 @@ local function logMessage(message)
     local logEntry = string.format("%s: %s", message.FromSpeaker, message.Message)
     table.insert(loggedMessages, logEntry)
     
+    -- Update displayed messages
+    table.insert(displayedMessages, logEntry)
+    if #displayedMessages > maxDisplayMessages then
+        table.remove(displayedMessages, 1)
+    end
+    
     -- Update GUI
-    ChatLogText.Text = ChatLogText.Text .. logEntry .. "\n"
+    ChatLogText.Text = table.concat(displayedMessages, "\n")
     ChatLogDisplay.CanvasSize = UDim2.new(0, 0, 0, ChatLogText.TextBounds.Y)
     ChatLogDisplay.CanvasPosition = Vector2.new(0, ChatLogDisplay.CanvasPosition.Y + ChatLogText.TextBounds.Y)
 end
