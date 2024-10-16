@@ -1,0 +1,17 @@
+--game https://www.roblox.com/games/10175705301/Cant-Say-the-Word
+local Plugin = {
+	["PluginName"] = "changeword",
+	["PluginDescription"] = "changesword",
+	["Commands"] = {
+		["newword"] = {
+			["ListName"] = "newword/changeword",
+			["Description"] = "",
+			["Aliases"] = {"cword"},
+			["Function"] = function(args, speaker)
+			game:GetService("MarketplaceService"):SignalPromptProductPurchaseFinished(game.Players.LocalPlayer.UserId, 1284736062, true)	
+			end,
+		},
+	},
+}
+
+return Plugin
