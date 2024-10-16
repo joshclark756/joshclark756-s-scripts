@@ -1,0 +1,69 @@
+-- note to set velocity of part do it in this format ;lockvelocity 0 0 0
+local Plugin = {
+    ["PluginName"] = "VelocityLocker",
+    ["PluginDescription"] = "Lock and unlock velocity of unanchored parts",
+    ["Commands"] = {
+        ["lockvelocity"] = {
+            ["ListName"] = "lockvelocity",
+            ["Description"] = "Set and lock velocity of unanchored parts",
+            ["Aliases"] = {"lv", "lockvelo"},
+            ["Function"] = function(args, speaker)
+                local velocity = Vector3.new(tonumber(args[1]) or 0, tonumber(args[2]) or 0, tonumber(args[3]) or 0)
+                local player = game.Players.LocalPlayer
+                local character = player.Character or player.CharacterAdded:Wait()
+
+                for _, part in pairs(workspace:GetDescendants()) do
+                    if part:IsA("BasePart") and not part.Anchored and not part:IsDescendantOf(character) then
+                        part.Velocity = velocity
+                        
+                        -- Create a loop to maintain the locked velocity
+                        spawn(function()
+                            local isLocked = true
+                            while isLocked do
+                                local currentVelocity = part.Velocity
+                                local difference = (currentVelocity - velocity).Magnitude
+                                
+                                if difference > 1 then  -- If the difference is significant
+                                    part.Velocity = velocity
+                                else
+                                    -- Allow small changes in velocity
+                                    velocity = currentVelocity
+                                end
+                                
+                                if not _G.VelocityLocked then
+                                    isLocked = false
+                                end
+                                
+                                wait()
+                            end
+                        end)
+                    end
+                end
+
+                _G.VelocityLocked = true
+
+                game.StarterGui:SetCore("SendNotification", {
+                    Title = "Velocity Locked",
+                    Text = "Unanchored parts velocity set and locked to " .. tostring(velocity),
+                    Duration = 5
+                })
+            end,
+        },
+        ["unlockvelocity"] = {
+            ["ListName"] = "unlockvelocity",
+            ["Description"] = "Unlock velocity of parts",
+            ["Aliases"] = {"uv", "unlockvelo"},
+            ["Function"] = function(args, speaker)
+                _G.VelocityLocked = false
+
+                game.StarterGui:SetCore("SendNotification", {
+                    Title = "Velocity Unlocked",
+                    Text = "All parts velocity unlocked",
+                    Duration = 5
+                })
+            end,
+        },
+    },
+}
+
+return Plugin
