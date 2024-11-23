@@ -1,11 +1,11 @@
 --- made by joshclark756
 --- selecteable + downloadable chat logger
+--- made by joshclark756
+--- selecteable + downloadable chat logger
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local UserInputService = game:GetService("UserInputService")
-
-local chatEvents = ReplicatedStorage:WaitForChild("DefaultChatSystemChatEvents")
-local onMessageEvent = chatEvents:WaitForChild("OnMessageDoneFiltering")
+local TextChatService = game:GetService("TextChatService")
 
 local loggedMessages = {}
 local displayedMessages = {}
@@ -115,8 +115,8 @@ DownloadButton.TextSize = 18
 DownloadButton.Text = "Download Chat Log"
 DownloadButton.Parent = MainFrame
 
-local function logMessage(message)
-    local logEntry = string.format("%s: %s", message.FromSpeaker, message.Message)
+local function logMessage(speaker, message)
+    local logEntry = string.format("%s: %s", speaker, message)
     table.insert(loggedMessages, logEntry)
     
     -- Update displayed messages
@@ -131,8 +131,26 @@ local function logMessage(message)
     ChatLogDisplay.CanvasPosition = Vector2.new(0, ChatLogDisplay.CanvasPosition.Y + ChatLogText.TextBounds.Y)
 end
 
-onMessageEvent.OnClientEvent:Connect(function(messageObj, channelName)
-    logMessage(messageObj)
+-- Legacy Chat System Support
+local success, _ = pcall(function()
+    local chatEvents = ReplicatedStorage:WaitForChild("DefaultChatSystemChatEvents", 1)
+    if chatEvents then
+        local onMessageEvent = chatEvents:WaitForChild("OnMessageDoneFiltering", 1)
+        if onMessageEvent then
+            onMessageEvent.OnClientEvent:Connect(function(messageObj, channelName)
+                logMessage(messageObj.FromSpeaker, messageObj.Message)
+            end)
+        end
+    end
+end)
+
+-- New Chat System Support
+local success2, _ = pcall(function()
+    if TextChatService then
+        TextChatService.MessageReceived:Connect(function(textChatMessage)
+            logMessage(textChatMessage.TextSource.Name, textChatMessage.Text)
+        end)
+    end
 end)
 
 -- Function to save logged messages to a file
