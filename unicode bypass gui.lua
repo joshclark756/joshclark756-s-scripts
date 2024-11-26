@@ -1,3 +1,6 @@
+-- made by joshclark756
+-- lets you swear using combining characters
+-- set language to Қазақ Тілі* for better use
 local ScreenGui = Instance.new("ScreenGui")
 local MainFrame = Instance.new("Frame")
 local Title = Instance.new("TextLabel")
