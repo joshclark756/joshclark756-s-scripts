@@ -129,11 +129,23 @@ ConvertButton.MouseButton1Click:Connect(ConvertText)
 
 -- Chat Function
 local function SendToChat()
+     -- Try both chat systems
     local ReplicatedStorage = game:GetService("ReplicatedStorage")
-    local DefaultChatSystemChatEvents = ReplicatedStorage:WaitForChild("DefaultChatSystemChatEvents")
-    local SayMessageRequest = DefaultChatSystemChatEvents:WaitForChild("SayMessageRequest")
     
-    SayMessageRequest:FireServer(OutputText.Text, "All")
+    -- Legacy chat system
+    local DefaultChatSystemChatEvents = ReplicatedStorage:FindFirstChild("DefaultChatSystemChatEvents")
+    if DefaultChatSystemChatEvents then
+        local SayMessageRequest = DefaultChatSystemChatEvents:FindFirstChild("SayMessageRequest")
+        if SayMessageRequest then
+            SayMessageRequest:FireServer(convertedText, "All")
+        end
+    end
+    
+    -- New chat system
+    local TextChatService = game:GetService("TextChatService")
+    if TextChatService then
+        TextChatService.ChatInputBarConfiguration.TargetTextChannel:SendAsync(convertedText)
+    end
     OutputText.Text = ""  -- Clear the output text after sending
 end
 
