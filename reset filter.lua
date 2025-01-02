@@ -1,5 +1,4 @@
--- made by joshclark756
--- resets the filter
+
 local Players = game:GetService('Players')
 local UserInputService = game:GetService('UserInputService')
 local LocalPlayer = Players.LocalPlayer
@@ -29,6 +28,9 @@ UserInputService.InputBegan:Connect(function(input, gameProcessedEvent)
     if not gameProcessedEvent and input.KeyCode == Enum.KeyCode.R then
         local randomText = generateRandomString()
         local modified = modifyString(randomText)
+        game.Players:Chat("/e " .. modified)
+        game.Players:Chat("/e " .. modified)
+        game.Players:Chat("/e " .. modified)
         game.Players:Chat("/e " .. modified)
     end
 end)
