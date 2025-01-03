@@ -29,8 +29,5 @@ UserInputService.InputBegan:Connect(function(input, gameProcessedEvent)
         local randomText = generateRandomString()
         local modified = modifyString(randomText)
         game.Players:Chat("/e " .. modified)
-        game.Players:Chat("/e " .. modified)
-        game.Players:Chat("/e " .. modified)
-        game.Players:Chat("/e " .. modified)
     end
 end)
