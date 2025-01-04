@@ -2,8 +2,13 @@ local Players = game:GetService('Players')
 local UserInputService = game:GetService('UserInputService')
 local LocalPlayer = Players.LocalPlayer
 
--- Set the number of random strings to generate on key press remove the -- to set it to a custom ammount
---local numberOfStrings = 4
+-- Global variable to ensure the script doesn't run multiple times
+if _G.scriptIsRunning then return end
+_G.scriptIsRunning = true
+
+-- Set the number of random strings to generate on key press
+-- Remove the -- to set it to a custom amount
+-- local numberOfStrings = 4
 
 -- Ensure numberOfStrings is valid
 if type(numberOfStrings) ~= 'number' or numberOfStrings <= 0 then
