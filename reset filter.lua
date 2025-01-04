@@ -12,7 +12,7 @@ _G.scriptIsRunning = true
 
 -- Ensure numberOfStrings is valid
 if type(numberOfStrings) ~= 'number' or numberOfStrings <= 0 then
-    numberOfStrings = 4
+    numberOfStrings = 8
 end
 
 local function generateRandomString()
