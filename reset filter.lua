@@ -1,7 +1,14 @@
-
 local Players = game:GetService('Players')
 local UserInputService = game:GetService('UserInputService')
 local LocalPlayer = Players.LocalPlayer
+
+-- Set the number of random strings to generate on key press remove the -- to set it to a custom ammount
+--local numberOfStrings = 4
+
+-- Ensure numberOfStrings is valid
+if type(numberOfStrings) ~= 'number' or numberOfStrings <= 0 then
+    numberOfStrings = 4
+end
 
 local function generateRandomString()
     local chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
@@ -26,8 +33,10 @@ end
 
 UserInputService.InputBegan:Connect(function(input, gameProcessedEvent)
     if not gameProcessedEvent and input.KeyCode == Enum.KeyCode.R then
-        local randomText = generateRandomString()
-        local modified = modifyString(randomText)
-        game.Players:Chat("/e " .. modified)
+        for i = 1, numberOfStrings do
+            local randomText = generateRandomString()
+            local modified = modifyString(randomText)
+            game.Players:Chat("/e " .. modified)
+        end
     end
 end)
