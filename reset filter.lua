@@ -11,6 +11,7 @@ _G.scriptIsRunning = true
 -- local numberOfStrings = 4
 
 -- Ensure numberOfStrings is valid
+local numberOfStrings = 8
 if type(numberOfStrings) ~= 'number' or numberOfStrings <= 0 then
     numberOfStrings = 8
 end
@@ -36,12 +37,20 @@ local function modifyString(randomText)
     return modified
 end
 
+-- Function to broadcast the message
+local function broadcastMessage(modified)
+    game.Players:Chat("/e " .. modified)
+end
+
 UserInputService.InputBegan:Connect(function(input, gameProcessedEvent)
     if not gameProcessedEvent and input.KeyCode == Enum.KeyCode.R then
         for i = 1, numberOfStrings do
             local randomText = generateRandomString()
             local modified = modifyString(randomText)
-            game.Players:Chat("/e " .. modified)
+            broadcastMessage(modified)
         end
     end
 end)
+
+-- Allow other scripts to call the broadcastMessage function
+_G.broadcastMessage = broadcastMessage
