@@ -7,10 +7,6 @@ if _G.scriptIsRunning then return end
 _G.scriptIsRunning = true
 
 -- Set the number of random strings to generate on key press
--- Remove the -- to set it to a custom amount
--- local numberOfStrings = 4
-
--- Ensure numberOfStrings is valid
 local numberOfStrings = 8
 if type(numberOfStrings) ~= 'number' or numberOfStrings <= 0 then
     numberOfStrings = 8
@@ -42,6 +38,12 @@ local function broadcastMessage(modified)
     game.Players:Chat("/e " .. modified)
 end
 
+-- Allow global access to broadcastMessage function
+_G.broadcastMessage = function(text)
+    local modified = modifyString(text)
+    broadcastMessage(modified)
+end
+
 UserInputService.InputBegan:Connect(function(input, gameProcessedEvent)
     if not gameProcessedEvent and input.KeyCode == Enum.KeyCode.R then
         for i = 1, numberOfStrings do
@@ -51,6 +53,3 @@ UserInputService.InputBegan:Connect(function(input, gameProcessedEvent)
         end
     end
 end)
-
--- Allow other scripts to call the broadcastMessage function
-_G.broadcastMessage = broadcastMessage
